@@ -1,0 +1,20 @@
+{
+    "name": "SWeetJelly.Loading.InitialiserIntegration",
+    "rootNamespace": "SWeetJelly.Loading.InitialiserIntegration",
+    "references": [
+        "SWeetJelly.Loading.Contract",
+        "SWeetJelly.Loading.App",
+        "SWeetJelly.Loading.Framework",
+        "SWeetJelly.Initialiser.Contract",
+        "SWeetJelly.Initialiser.Framework"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

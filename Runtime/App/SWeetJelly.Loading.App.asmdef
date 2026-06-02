@@ -1,0 +1,16 @@
+{
+    "name": "SWeetJelly.Loading.App",
+    "rootNamespace": "SWeetJelly.Loading.App",
+    "references": [
+        "SWeetJelly.Loading.Contract"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

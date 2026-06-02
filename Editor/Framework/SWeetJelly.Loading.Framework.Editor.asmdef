@@ -1,0 +1,16 @@
+{
+    "name": "SWeetJelly.Loading.Framework.Editor",
+    "rootNamespace": "SWeetJelly.Loading.Framework.Editor",
+    "references": [
+        "GUID:292198e5763eb10449e4d5701d5feb8f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
