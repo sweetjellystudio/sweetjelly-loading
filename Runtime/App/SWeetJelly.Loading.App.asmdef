@@ -2,7 +2,8 @@
     "name": "SWeetJelly.Loading.App",
     "rootNamespace": "SWeetJelly.Loading.App",
     "references": [
-        "SWeetJelly.Loading.Contract"
+        "SWeetJelly.Loading.Contract",
+        "SWeetJelly.Shared.Result"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

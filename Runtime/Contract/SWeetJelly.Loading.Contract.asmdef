@@ -1,7 +1,9 @@
 {
     "name": "SWeetJelly.Loading.Contract",
     "rootNamespace": "SWeetJelly.Loading.Contract",
-    "references": [],
+    "references": [
+        "SWeetJelly.Shared.Result"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
