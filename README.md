@@ -42,6 +42,7 @@ Defines the public loading API.
 * `ILoadingOperationRunner`
 * `LoadingRequest`
 * `LoadingOperationType`
+* `LoadingErrors`
 * loading event args
 
 ### App
@@ -78,6 +79,15 @@ Supported operations include:
 
 It creates or finds `LoadingBehaviour`, creates `LoadingService`, and registers it as `ILoadingService`.
 
+## LoadingRequest
+
+- `operationType`: `None`, `Simple`, `LoadScene`, or `LoadAdditiveScene`
+- `sceneName`: required for scene loading operations
+- `message`: message passed through loading events
+- `minimumDuration`: minimum loading time in seconds
+- `waitForManualCompletion`: waits until `MarkAsReadyToComplete()` is called
+- `tasks`: custom tasks executed before the main loading operation
+
 ## Basic Usage
 
 Resolve `ILoadingService` from the application context and run a loading request.
@@ -89,8 +99,18 @@ var request = new LoadingRequest(
     message: "Loading...",
     minimumDuration: 1.0f);
 
-await loadingService.RunAsync(request, cancellationToken);
+var result = await loadingService.RunAsync(request, cancellationToken);
+
+if (result.IsFailure)
+{
+    // Inspect result.Error.
+    return;
+}
 ```
+
+`RunAsync` returns a `Result`. Concrete loading failures are described through `LoadingErrors`.
+
+The returned `Result` is the authoritative command outcome. Loading events are lifecycle notifications for UI, logging, or presentation code.
 
 ## Loading Events
 
@@ -105,6 +125,24 @@ loadingService.LoadingFailed += OnLoadingFailed;
 
 The loading module does not provide loading UI directly.
 UI should subscribe to these events and render progress independently.
+
+When loading fails, `LoadingFailedEventArgs.Error` contains the same error returned by `RunAsync`.
+
+Event subscribers are responsible for handling their own exceptions. `LoadingService` only publishes lifecycle events; Unity presenters, views, or adapters should catch and log view update failures in their own layer.
+
+```csharp
+private void OnLoadingUpdated(object sender, LoadingEventArgs args)
+{
+    try
+    {
+        view.SetProgress(args.Progress, args.Message);
+    }
+    catch (Exception ex)
+    {
+        Debug.LogException(ex);
+    }
+}
+```
 
 ## Custom Loading Tasks
 

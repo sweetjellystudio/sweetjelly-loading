@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using SWeetJelly.Shared.Result;
 
 namespace SWeetJelly.Loading.Contract
 {
@@ -13,7 +14,7 @@ namespace SWeetJelly.Loading.Contract
 
         bool IsLoading { get; }
 
-        Task RunAsync(LoadingRequest request, CancellationToken ct = default);
+        Task<Result> RunAsync(LoadingRequest request, CancellationToken ct = default);
         void MarkAsReadyToComplete();
     }
 }

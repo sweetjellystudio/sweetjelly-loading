@@ -1,15 +1,17 @@
 using System;
+using SWeetJelly.Shared.Result;
 
 namespace SWeetJelly.Loading.Contract
 {
     public class LoadingFailedEventArgs : EventArgs
     {
-        public string ErrorMessage { get; private set; }
-        public Exception Exception { get; private set; }
+        public Error Error { get; }
+        public string ErrorMessage => Error.Message;
+        public Exception Exception { get; }
 
-        public LoadingFailedEventArgs(string errorMessage, Exception exception)
+        public LoadingFailedEventArgs(Error error, Exception exception = null)
         {
-            ErrorMessage = errorMessage;
+            Error = error;
             Exception = exception;
         }
     }

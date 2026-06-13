@@ -4,6 +4,7 @@ namespace SWeetJelly.Loading.App
     using System.Threading;
     using System.Threading.Tasks;
     using Contract;
+    using SWeetJelly.Shared.Result;
 
     #nullable enable
 
@@ -25,13 +26,13 @@ namespace SWeetJelly.Loading.App
                 ?? throw new ArgumentNullException(nameof(operationRunner));
         }
 
-        public async Task RunAsync(LoadingRequest request, CancellationToken ct = default)
+        public async Task<Result> RunAsync(LoadingRequest request, CancellationToken ct = default)
         {
             if (request == null)
-                throw new ArgumentNullException(nameof(request));
+                return Result.Failure(LoadingErrors.InvalidRequest);
 
             if (IsLoading)
-                throw new InvalidOperationException("Loading is already running.");
+                return Result.Failure(LoadingErrors.AlreadyRunning);
 
             IsLoading = true;
             manualCompletionSource = null;
@@ -51,16 +52,20 @@ namespace SWeetJelly.Loading.App
 
                 RaiseUpdated(1f, "Done");
                 RaiseCompleted(1f, "Done");
+
+                return Result.Success();
             }
             catch (OperationCanceledException)
             {
-                RaiseFailed("Loading was cancelled.", null);
-                throw;
+                Error error = LoadingErrors.Cancelled;
+                RaiseFailed(error, null);
+                return Result.Failure(error);
             }
             catch (Exception ex)
             {
-                RaiseFailed(ex.Message, ex);
-                throw;
+                Error error = LoadingErrors.OperationFailed(ex);
+                RaiseFailed(error, ex);
+                return Result.Failure(error);
             }
             finally
             {
@@ -129,9 +134,9 @@ namespace SWeetJelly.Loading.App
             LoadingCompleted?.Invoke(this, new LoadingEventArgs(progress, message));
         }
 
-        private void RaiseFailed(string message, Exception? exception)
+        private void RaiseFailed(Error error, Exception? exception)
         {
-            LoadingFailed?.Invoke(this, new LoadingFailedEventArgs(message, exception));
+            LoadingFailed?.Invoke(this, new LoadingFailedEventArgs(error, exception));
         }
     }
 }
