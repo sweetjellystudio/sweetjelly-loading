@@ -20,5 +20,6 @@
                         "description":  "Sample scene and assets for Loading Sample.",
                         "path":  "Samples~/Basic"
                     }
-                ]
+                ],
+    "license":  "MIT"
 }
