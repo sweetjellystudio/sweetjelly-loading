@@ -1,22 +1,19 @@
-namespace SWeetJelly.Loading.InitialiserIntegration
+﻿namespace SWeetJelly.Loading.Framework.Bootstrapper
 {
 
     using UnityEngine;
     using SWeetJelly.Loading.Contract;
     using SWeetJelly.Loading.App;
-    using SWeetJelly.Loading.Framework;
-    using SWeetJelly.Initialiser.Contract;
-    using SWeetJelly.Initialiser.Framework;
-
-    [RegisterModule("Loading")]
+    using SWeetJelly.Loading.Framework.Unity;
+    using SWeetJelly.Bootstrapper.Framework.Unity;
     [CreateAssetMenu(
-        fileName = "Loading Init Module", 
-        menuName = "SWeetJelly/Initialiser/Modules/Loading")]
-    public class LoadingInitModule : InitModuleSo
+        fileName = "Loading Package Bootstrapper", 
+        menuName = "SWeetJelly/Bootstrapper/Packages/Loading")]
+    public class LoadingPackageBootstrapperSo : PackageBootstrapperSo
     {
-        public override string ModuleName => "Loading";
+        public override string PackageName => "Loading";
 
-        public override void Install(InitModuleInstallContext context)
+        public override void Bootstrap(PackageBootstrapContext context)
         {
             if (context == null)
                 throw new System.ArgumentNullException(nameof(context));

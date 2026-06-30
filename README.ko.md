@@ -22,12 +22,12 @@ package "SWeetJelly.Loading.App" {
   class LoadingService
 }
 
-package "SWeetJelly.Loading.Framework" {
+package "SWeetJelly.Loading.Framework.Unity" {
   class LoadingBehaviour
 }
 
-package "SWeetJelly.Loading.InitialiserIntegration" {
-  class LoadingInitModule
+package "SWeetJelly.Loading.Framework.Bootstrapper" {
+  class LoadingPackageBootstrapperSo
 }
 ```
 
@@ -73,9 +73,9 @@ Unity 전용 loading operation logic을 포함합니다.
 - single scene loading
 - additive scene loading
 
-### Initialiser Integration
+### Bootstrapper Integration
 
-`LoadingInitModule`은 loading module을 Initialiser system에 설치합니다.
+`LoadingPackageBootstrapperSo`은 loading module을 Bootstrapper system에 설치합니다.
 
 `LoadingBehaviour`를 생성하거나 찾고, `LoadingService`를 만든 뒤 `ILoadingService`로 등록합니다.
 
