@@ -1,0 +1,19 @@
+{
+    "name": "SWeetJelly.Loading.Sample",
+    "rootNamespace": "SWeetJelly.Samples.Loading",
+    "references": [
+        "SWeetJelly.Bootstrapper.Contract",
+        "SWeetJelly.Bootstrapper.Framework.Unity",
+        "SWeetJelly.Loading.Contract",
+        "SWeetJelly.Shared.Result"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -22,12 +22,12 @@ package "SWeetJelly.Loading.App" {
   class LoadingService
 }
 
-package "SWeetJelly.Loading.Framework" {
+package "SWeetJelly.Loading.Framework.Unity" {
   class LoadingBehaviour
 }
 
-package "SWeetJelly.Loading.InitialiserIntegration" {
-  class LoadingInitModule
+package "SWeetJelly.Loading.Framework.Bootstrapper" {
+  class LoadingPackageBootstrapperSo
 }
 ```
 
@@ -73,9 +73,9 @@ Supported operations include:
 * single scene loading
 * additive scene loading
 
-### Initialiser Integration
+### Bootstrapper Integration
 
-`LoadingInitModule` installs the loading module into the Initialiser system.
+`LoadingPackageBootstrapperSo` installs the loading module into the Bootstrapper system.
 
 It creates or finds `LoadingBehaviour`, creates `LoadingService`, and registers it as `ILoadingService`.
 

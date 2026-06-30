@@ -1,17 +1,24 @@
-{
-  "name": "com.sweetjelly.loading",
-  "version": "1.0.0",
-  "displayName": "SWeetJelly Loading",
-  "description": "This is SWeetJelly Loading",
-  "unity": "2022.3",
-  "dependencies": {
-    "com.sweetjelly.initialiser": "1.0.0",
-    "com.sweetjelly.utils": "1.1.0",
-    "com.sweetjelly.shared": "1.0.0"
-  },
-  "author": {
-    "name": "SWeetJellyStudio",
-    "email": "sweetjellystudio@gmail.com",
-    "url": "https://www.sweetjellystudio.com"
-  }
+﻿{
+    "name":  "com.sweetjelly.loading",
+    "version":  "1.0.0",
+    "displayName":  "SWeetJelly Loading",
+    "description":  "This is SWeetJelly Loading",
+    "unity":  "2022.3",
+    "dependencies":  {
+                         "com.sweetjelly.bootstrapper":  "1.0.0",
+                         "com.sweetjelly.utils":  "1.1.0",
+                         "com.sweetjelly.shared":  "1.0.0"
+                     },
+    "author":  {
+                   "name":  "SWeetJellyStudio",
+                   "email":  "sweetjellystudio@gmail.com",
+                   "url":  "https://www.sweetjellystudio.com"
+               },
+    "samples":  [
+                    {
+                        "displayName":  "Loading Sample",
+                        "description":  "Sample scene and assets for Loading Sample.",
+                        "path":  "Samples~/Basic"
+                    }
+                ]
 }

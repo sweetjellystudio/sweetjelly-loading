@@ -5,7 +5,7 @@ using SWeetJelly.Loading.Contract;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SWeetJelly.Loading.Framework
+namespace SWeetJelly.Loading.Framework.Unity
 {
     public sealed class LoadingBehaviour : MonoBehaviour, ILoadingOperationRunner
     {
