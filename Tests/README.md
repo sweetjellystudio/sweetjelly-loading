@@ -1,5 +1,17 @@
 # Loading Tests
 
+Unity 6.3 LTS is the supported baseline. Add `com.sweetjelly.loading` to the consumer's manifest `testables` and install the declared dependencies. When using Git dependencies, explicitly list the Bootstrapper and Shared Git URLs as described in the root README.
+
+## Verification boundaries
+
+EditMode tests exercise public request/service behavior, task-list snapshots, early readiness, validation, cancellation, shutdown drain and terminal observer errors. Bootstrap integration tests cover existing registrations, borrowed/replaced adapter ownership, reuse and partial registration failure rollback.
+
+PlayMode tests exercise actual Single/Additive scene operations, cancellation before and after start, progress failure, adapter destruction, unlocked engine queues and timeScale-independent completion. The engine fixture implements IPrebuildSetup/IPostBuildCleanup to add its scene assets before entering Play Mode and restore the previous scene list afterward. If a test run is interrupted, restore its saved setup through the fixture Cleanup before another run; the fixture refuses to overwrite an un-restored snapshot.
+
+Import the Basic sample for UI Toolkit verification. Check Timed, early Manual Ready, Cancel, invalid-request feedback, component/GameObject disable/re-enable and protection of another consumer's Run. Inspect the UIDocument's UXML and PanelSettings assignments and check fresh import diagnostics as well as the rendered screen.
+
+Development-host results do not substitute for a minimal consumer. Selected ordinary Windows Mono and IL2CPP Player checks are recorded separately by the development host; this README does not claim that all platforms or publicly published tags have been tested.
+
 이 폴더는 `com.sweetjelly.loading` 패키지를 현재 Unity 테스트 프로젝트에서 검증하기 위한 테스트를 담는다.
 
 ## EditMode
@@ -24,4 +36,4 @@
   - `Simple` loading operation이 완료되는지 검증한다.
   - scene loading 요청에 scene name이 없을 때 `ArgumentException`이 발생하는지 검증한다.
 
-실제 scene load 성공 플로우는 테스트용 scene과 `EditorBuildSettings` 구성이 필요하므로, 현재는 안전한 기본 동작만 검증한다.
+`LoadingEngineLifetimeTest`는 패키지의 실제 씬 fixture와 진입 전 scene-list 준비를 사용해 Single/Additive 성공·취소·예외·파괴 정리를 검증한다.

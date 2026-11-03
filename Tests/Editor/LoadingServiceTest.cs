@@ -78,7 +78,7 @@ namespace SWeetJelly.Loading.Tests.EditMode
         }
 
         [Test]
-        public void RunAsync_WhenWaitingForManualCompletion_CompletesAfterMarkAsReadyToComplete()
+        public async Task RunAsync_WhenWaitingForManualCompletion_CompletesAfterMarkAsReadyToComplete()
         {
             var service = new LoadingService(new FakeOperationRunner());
 
@@ -89,7 +89,7 @@ namespace SWeetJelly.Loading.Tests.EditMode
             Assert.That(run.IsCompleted, Is.False);
 
             service.MarkAsReadyToComplete();
-            var result = run.GetAwaiter().GetResult();
+            var result = await run;
 
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(service.IsLoading, Is.False);

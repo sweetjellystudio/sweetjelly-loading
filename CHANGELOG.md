@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v2.0.0
+
+* Require Unity 6.3 LTS and Bootstrapper/Shared 2.0; remove the unused Utils dependency.
+* Snapshot task lists and reject invalid requests before side effects.
+* Remember early manual readiness and use cancellable monotonic minimum-duration waits.
+* Deliver terminal notifications once to all subscribers, propagate the first observer error, and restore state.
+* Add concrete service Dispose/ShutdownAsync, per-Run cancellation and late-progress isolation.
+* Drain started scene operations after unlocking activation on cancellation, callback failure or adapter destruction.
+* Protect bootstrap ownership, matching cleanup and partial initialization rollback.
+* Replace runtime IMGUI in the Basic sample with UI Toolkit and own-request cancellation/subscription cleanup.
+* Add package architecture, lifetime ADR, migration guidance and regression coverage.
+
 ## v1.0.0
 
 * [Added] Added `SWeetJelly.Loading` as an independent Unity package extracted from the previous Core module.

@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee834b420e2f9a540af76d27528c369e, type: 3}
   m_Name: Loading Package Bootstrapper
   m_EditorClassIdentifier: 
-  installOrder: 100
+  bootstrapOrder: 100

@@ -1,6 +1,8 @@
 namespace SWeetJelly.Loading.App
 {
     using System;
+    using System.Diagnostics;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Contract;
@@ -8,135 +10,165 @@ namespace SWeetJelly.Loading.App
 
     #nullable enable
 
-    public sealed class LoadingService : ILoadingService
+    public sealed class LoadingService : ILoadingService, IDisposable
     {
         private readonly ILoadingOperationRunner operationRunner;
-        private TaskCompletionSource<bool>? manualCompletionSource;
+        private Run? activeRun;
+        private bool disposed;
 
         public event EventHandler<LoadingEventArgs>? LoadingStarted;
         public event EventHandler<LoadingEventArgs>? LoadingUpdated;
         public event EventHandler<LoadingEventArgs>? LoadingCompleted;
         public event EventHandler<LoadingFailedEventArgs>? LoadingFailed;
 
-        public bool IsLoading { get; private set; }
+        public bool IsLoading => activeRun != null;
 
         public LoadingService(ILoadingOperationRunner operationRunner)
         {
-            this.operationRunner = operationRunner 
-                ?? throw new ArgumentNullException(nameof(operationRunner));
+            this.operationRunner = operationRunner ?? throw new ArgumentNullException(nameof(operationRunner));
         }
 
-        public async Task<Result> RunAsync(LoadingRequest request, CancellationToken ct = default)
+        public Task<Result> RunAsync(LoadingRequest request, CancellationToken ct = default)
         {
-            if (request == null)
-                return Result.Failure(LoadingErrors.InvalidRequest);
+            if (disposed) return Task.FromResult(Result.Failure(LoadingErrors.Disposed));
+            if (!IsValid(request)) return Task.FromResult(Result.Failure(LoadingErrors.InvalidRequest));
+            if (IsLoading) return Task.FromResult(Result.Failure(LoadingErrors.AlreadyRunning));
+            if (ct.IsCancellationRequested) return Task.FromResult(Result.Failure(LoadingErrors.Cancelled));
 
-            if (IsLoading)
-                return Result.Failure(LoadingErrors.AlreadyRunning);
-
-            IsLoading = true;
-            manualCompletionSource = null;
-
-            try
-            {
-                RaiseStarted(0f, request.Message);
-
-                var startedAt = DateTimeOffset.UtcNow;
-
-                await RunTasksAsync(request, ct);
-                await operationRunner.RunAsync(request, RaiseUpdated, ct);
-                await WaitMinimumDurationAsync(startedAt, request.MinimumDuration, ct);
-
-                if (request.WaitForManualCompletion)
-                    await WaitManualCompletionAsync(ct);
-
-                RaiseUpdated(1f, "Done");
-                RaiseCompleted(1f, "Done");
-
-                return Result.Success();
-            }
-            catch (OperationCanceledException)
-            {
-                Error error = LoadingErrors.Cancelled;
-                RaiseFailed(error, null);
-                return Result.Failure(error);
-            }
-            catch (Exception ex)
-            {
-                Error error = LoadingErrors.OperationFailed(ex);
-                RaiseFailed(error, ex);
-                return Result.Failure(error);
-            }
-            finally
-            {
-                IsLoading = false;
-                manualCompletionSource = null;
-            }
+            var run = new Run(ct, request.WaitForManualCompletion);
+            activeRun = run;
+            return ExecuteAsync(request, run);
         }
 
         public void MarkAsReadyToComplete()
         {
-            manualCompletionSource?.TrySetResult(true);
+            if (!disposed) activeRun?.Ready?.TrySetResult(true);
         }
 
-        private static async Task RunTasksAsync(LoadingRequest request, CancellationToken ct)
+        public void Dispose()
         {
-            foreach (var task in request.Tasks)
+            if (disposed) return;
+            disposed = true;
+            activeRun?.Cancellation.Cancel();
+        }
+
+        /// <summary>Close to new requests and await cleanup, independently of observer errors on RunAsync.</summary>
+        public Task ShutdownAsync()
+        {
+            var drained = activeRun?.Drained.Task ?? Task.CompletedTask;
+            Dispose();
+            return drained;
+        }
+
+        private async Task<Result> ExecuteAsync(LoadingRequest request, Run run)
+        {
+            var ct = run.Cancellation.Token;
+            try
+            {
+                Result result;
+                Exception? failure = null;
+                try
+                {
+                    LoadingStarted?.Invoke(this, new LoadingEventArgs(0f, request.Message));
+                    ct.ThrowIfCancellationRequested();
+                    foreach (var task in request.Tasks)
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        if (task != null) await task.RunAsync(ct);
+                    }
+                    ct.ThrowIfCancellationRequested();
+                    await operationRunner.RunAsync(request, (value, message) =>
+                    {
+                        if (ReferenceEquals(activeRun, run) && !run.Terminal && !disposed
+                            && !ct.IsCancellationRequested)
+                            LoadingUpdated?.Invoke(this, new LoadingEventArgs(value, message));
+                    }, ct);
+                    ct.ThrowIfCancellationRequested();
+                    await WaitMinimumDurationAsync(run.StartedAt, request.MinimumDuration, ct);
+                    if (run.Ready != null)
+                    {
+                        using (ct.Register(() => run.Ready.TrySetCanceled(ct)))
+                            await run.Ready.Task;
+                    }
+                    ct.ThrowIfCancellationRequested();
+                    LoadingUpdated?.Invoke(this, new LoadingEventArgs(1f, "Done"));
+                    ct.ThrowIfCancellationRequested();
+                    result = Result.Success();
+                }
+                catch (OperationCanceledException)
+                {
+                    result = Result.Failure(LoadingErrors.Cancelled);
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                    result = Result.Failure(LoadingErrors.OperationFailed(ex));
+                }
+
+                run.Terminal = true;
+                if (result.IsSuccess)
+                    NotifyAll(LoadingCompleted, new LoadingEventArgs(1f, "Done"));
+                else
+                    NotifyAll(LoadingFailed, new LoadingFailedEventArgs(result.Error, failure));
+                return result;
+            }
+            finally
+            {
+                run.Terminal = true;
+                activeRun = null;
+                run.Cancellation.Dispose();
+                run.Drained.TrySetResult(true);
+            }
+        }
+
+        private static bool IsValid(LoadingRequest request)
+        {
+            return request != null && !float.IsNaN(request.MinimumDuration)
+                && !float.IsInfinity(request.MinimumDuration)
+                && Enum.IsDefined(typeof(LoadingOperationType), request.OperationType)
+                && ((request.OperationType != LoadingOperationType.LoadScene
+                    && request.OperationType != LoadingOperationType.LoadAdditiveScene)
+                    || !string.IsNullOrWhiteSpace(request.SceneName));
+        }
+
+        private static async Task WaitMinimumDurationAsync(Stopwatch elapsed,
+            float minimumDuration, CancellationToken ct)
+        {
+            while (minimumDuration > elapsed.Elapsed.TotalSeconds)
             {
                 ct.ThrowIfCancellationRequested();
-
-                if (task == null)
-                    continue;
-
-                await task.RunAsync(ct);
+                var remaining = minimumDuration - elapsed.Elapsed.TotalSeconds;
+                var milliseconds = (int)Math.Max(1, Math.Ceiling(Math.Min(remaining * 1000d, 50d)));
+                await Task.Delay(milliseconds, ct);
             }
         }
 
-        private static async Task WaitMinimumDurationAsync(
-            DateTimeOffset startedAt,
-            float minimumDuration,
-            CancellationToken ct)
+        private void NotifyAll<T>(EventHandler<T>? handlers, T args) where T : EventArgs
         {
-            if (minimumDuration <= 0f)
-                return;
-
-            var minimum = TimeSpan.FromSeconds(minimumDuration);
-
-            while (DateTimeOffset.UtcNow - startedAt < minimum)
+            ExceptionDispatchInfo? first = null;
+            if (handlers == null) return;
+            foreach (EventHandler<T> handler in handlers.GetInvocationList())
             {
-                ct.ThrowIfCancellationRequested();
-                await Task.Yield();
+                try { handler(this, args); }
+                catch (Exception ex) { first ??= ExceptionDispatchInfo.Capture(ex); }
             }
+            first?.Throw();
         }
 
-        private async Task WaitManualCompletionAsync(CancellationToken ct)
+        private sealed class Run
         {
-            manualCompletionSource = new TaskCompletionSource<bool>();
+            internal readonly CancellationTokenSource Cancellation;
+            internal readonly TaskCompletionSource<bool>? Ready;
+            internal readonly TaskCompletionSource<bool> Drained =
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            internal readonly Stopwatch StartedAt = Stopwatch.StartNew();
+            internal bool Terminal;
 
-            using (ct.Register(() => manualCompletionSource.TrySetCanceled(ct)))
+            internal Run(CancellationToken token, bool manual)
             {
-                await manualCompletionSource.Task;
+                Cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+                if (manual) Ready = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             }
-        }
-
-        private void RaiseStarted(float progress, string message)
-        {
-            LoadingStarted?.Invoke(this, new LoadingEventArgs(progress, message));
-        }
-
-        private void RaiseUpdated(float progress, string message)
-        {
-            LoadingUpdated?.Invoke(this, new LoadingEventArgs(progress, message));
-        }
-
-        private void RaiseCompleted(float progress, string message)
-        {
-            LoadingCompleted?.Invoke(this, new LoadingEventArgs(progress, message));
-        }
-
-        private void RaiseFailed(Error error, Exception? exception)
-        {
-            LoadingFailed?.Invoke(this, new LoadingFailedEventArgs(error, exception));
         }
     }
 }

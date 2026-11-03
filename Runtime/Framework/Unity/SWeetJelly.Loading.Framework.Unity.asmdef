@@ -2,8 +2,7 @@
     "name": "SWeetJelly.Loading.Framework.Unity",
     "rootNamespace": "SWeetJelly.Loading.Framework.Unity",
     "references": [
-        "SWeetJelly.Loading.Contract",
-        "SWeetJelly.Loading.App"
+        "SWeetJelly.Loading.Contract"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -4,7 +4,8 @@
     "references": [
         "SWeetJelly.Loading.Contract",
         "SWeetJelly.Loading.App",
-        "SWeetJelly.Loading.Framework.Unity"
+        "SWeetJelly.Loading.Framework.Unity",
+        "SWeetJelly.Shared.Result"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
