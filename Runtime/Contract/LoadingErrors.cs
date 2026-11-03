@@ -6,13 +6,16 @@ namespace SWeetJelly.Loading.Contract
     public static class LoadingErrors
     {
         public static readonly Error InvalidRequest =
-            new Error("Loading.InvalidRequest", "Loading request cannot be null.");
+            new Error("Loading.InvalidRequest", "Loading request is invalid.");
 
         public static readonly Error AlreadyRunning =
             new Error("Loading.AlreadyRunning", "Loading is already running.");
 
         public static readonly Error Cancelled =
             new Error("Loading.Cancelled", "Loading was cancelled.");
+
+        public static readonly Error Disposed =
+            new Error("Loading.Disposed", "Loading service is closed.");
 
         public static Error OperationFailed(Exception exception)
         {

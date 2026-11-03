@@ -2,6 +2,24 @@
 
 Loading module for SWeetJelly Unity projects.
 
+Version 2.0 requires Unity 6.3 LTS. Read [MIGRATION.md](MIGRATION.md) for cancellation and observer behavior changes, [ARCHITECTURE.md](ARCHITECTURE.md) for ownership, and [Tests/README.md](Tests/README.md) for verification. The importable Basic sample uses UI Toolkit.
+
+## Installation
+
+Add the public Git URLs for Loading and its custom dependencies to the consuming project's `Packages/manifest.json`:
+
+```json
+{
+  "dependencies": {
+    "com.sweetjelly.loading": "https://github.com/sweetjellystudio/sweetjelly-loading.git#v2.0.0",
+    "com.sweetjelly.bootstrapper": "https://github.com/sweetjellystudio/sweetjelly-bootstrapper.git#v2.0.0",
+    "com.sweetjelly.shared": "https://github.com/sweetjellystudio/sweetjelly-shared.git#v2.0.0"
+  }
+}
+```
+
+Use the Loading URL after its tag is published. Local validation before publication does not verify that public tag. UPM package dependencies declare versions; custom Git URLs belong in the consumer manifest, including transitive custom dependencies.
+
 This module provides a simple loading flow service with support for custom loading tasks, scene loading operations, loading progress events, minimum loading duration, and manual completion control.
 
 ## Structure
@@ -112,6 +130,8 @@ if (result.IsFailure)
 
 The returned `Result` is the authoritative command outcome. Loading events are lifecycle notifications for UI, logging, or presentation code.
 
+Unhandled Completed/Failed observer exceptions fault the returned task after all terminal observers have been notified. Started/Updated observer exceptions instead produce an OperationFailed Result. Observe the task and handle your own presentation errors.
+
 ## Loading Events
 
 `ILoadingService` exposes events that can be used by UI or presentation code.
@@ -170,3 +190,7 @@ loadingService.MarkAsReadyToComplete();
 ```
 
 This is useful when the loading operation is done, but another system needs to finish preparation before the loading screen closes.
+
+Readiness is remembered from the start of the active Run; calls outside a Run are ignored. Minimum duration measures the whole successful flow using real monotonic time. Neither option delays Unity scene activation.
+
+Scene cancellation can still change the loaded scenes: a started engine operation is unlocked and drained before Cancelled is returned. There is no automatic rollback or unload. Use Unity calls, Ready, progress and shutdown on the main thread. Concrete service owners can Dispose to close new requests and request cancellation, or await ShutdownAsync to wait for cleanup.

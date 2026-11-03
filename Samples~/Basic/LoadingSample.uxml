@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="LoadingSample.uss" />
+    <ui:VisualElement name="root" class="screen">
+        <ui:VisualElement class="card">
+            <ui:Label text="LOADING / 2.0" class="eyebrow" />
+            <ui:Label text="Prepare. Load. Ready." class="title" />
+            <ui:Label text="A small consumer of the Loading service." class="description" />
+            <ui:Label name="statusLabel" text="Waiting for Loading service..." class="status" />
+            <ui:ProgressBar name="loadingProgress" low-value="0" high-value="100" value="0" title="0%" />
+            <ui:VisualElement class="actions">
+                <ui:Button name="timedButton" text="Run timed load" />
+                <ui:Button name="manualButton" text="Run manual load" />
+                <ui:Button name="failureButton" text="Trigger failure" />
+            </ui:VisualElement>
+            <ui:VisualElement class="actions">
+                <ui:Button name="readyButton" text="Mark ready" class="secondary" />
+                <ui:Button name="cancelButton" text="Cancel own request" class="secondary" />
+            </ui:VisualElement>
+            <ui:Label text="Manual readiness can be sent early. Cancel controls only this sample's request." class="description hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

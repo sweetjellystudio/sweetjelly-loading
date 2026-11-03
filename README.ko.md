@@ -2,6 +2,8 @@
 
 SWeetJelly Unity 프로젝트를 위한 loading module입니다.
 
+2.0의 최소 지원 환경은 Unity 6.3 LTS입니다. 설치 Git URL과 의존성은 [영문 README](README.md), 변경된 취소·이벤트·종료 계약은 [MIGRATION.md](MIGRATION.md), 책임과 소유권은 [ARCHITECTURE.md](ARCHITECTURE.md)를 확인하세요. Basic 샘플은 UI Toolkit으로 전환합니다.
+
 커스텀 loading task, scene loading operation, progress event, 최소 loading duration, manual completion control을 지원하는 단순한 loading flow service를 제공합니다.
 
 ## 구조
@@ -112,6 +114,8 @@ if (result.IsFailure)
 
 반환된 `Result`가 command outcome의 기준입니다. Loading event는 UI, logging, presentation code를 위한 lifecycle notification입니다.
 
+Completed/Failed 구독자 예외는 나머지 종료 구독자에게도 알림을 보낸 뒤 반환 task에 전파됩니다. Started/Updated 구독자 예외는 OperationFailed Result가 됩니다. 호출자는 반환 task를 관찰하고 UI 구독자는 자기 표현 오류를 처리해야 합니다.
+
 ## Loading Event
 
 `ILoadingService`는 UI나 presentation code가 사용할 수 있는 event를 노출합니다.
@@ -170,3 +174,7 @@ loadingService.MarkAsReadyToComplete();
 ```
 
 loading operation은 끝났지만 다른 시스템 준비가 더 필요할 때 유용합니다.
+
+Ready는 활성 Run 시작부터 기억하고 실행이 없을 때는 무시합니다. 최소 시간은 전체 성공 흐름의 단조 증가 실제 시간으로 측정하며 timeScale과 무관합니다. 두 조건은 Unity scene activation을 늦추지 않습니다.
+
+이미 시작된 씬 작업은 취소해도 씬을 바꿀 수 있습니다. 활성화 잠금을 풀고 engine 작업이 끝난 후 Cancelled를 반환하며 자동 rollback/unload는 제공하지 않습니다. Unity 호출·Ready·progress·Shutdown은 main thread의 직렬 문맥에서 사용합니다. 구체 LoadingService 소유자는 Dispose로 새 요청을 닫고 취소를 요청하며, ShutdownAsync로 정리 완료를 기다릴 수 있습니다.

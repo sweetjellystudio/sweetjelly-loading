@@ -4,6 +4,7 @@ namespace SWeetJelly.Loading.Tests.PlayMode
     using System.Collections;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using System.Threading;
     using NUnit.Framework;
     using SWeetJelly.Loading.Contract;
     using SWeetJelly.Loading.Framework.Unity;
@@ -12,6 +13,17 @@ namespace SWeetJelly.Loading.Tests.PlayMode
 
     public sealed class LoadingSceneFlowTest
     {
+        [UnityTest]
+        public IEnumerator CancelledBeforeStartDoesNotRunSimpleOperation()
+        {
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            var task = behaviour.RunAsync(new LoadingRequest(LoadingOperationType.Simple), null,
+                cancellation.Token);
+            yield return WaitForTask(task);
+            Assert.That(task.IsCanceled, Is.True);
+        }
+
         private GameObject holder;
         private LoadingBehaviour behaviour;
 
@@ -58,8 +70,10 @@ namespace SWeetJelly.Loading.Tests.PlayMode
 
         private static IEnumerator WaitForTask(Task task)
         {
+            var deadline = Time.realtimeSinceStartup + 10f;
             while (!task.IsCompleted)
             {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Loading task timed out.");
                 yield return null;
             }
         }

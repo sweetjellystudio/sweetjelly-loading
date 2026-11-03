@@ -1,0 +1,41 @@
+.screen {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background-color: #101a28;
+    color: #edf3ff;
+}
+.card {
+    width: 100%;
+    max-width: 680px;
+    padding: 28px;
+    background-color: #1b2b40;
+    border-radius: 12px;
+}
+.eyebrow { color: #83d8cd; font-size: 14px; -unity-font-style: bold; }
+.title { font-size: 30px; -unity-font-style: bold; margin-top: 8px; }
+.description { white-space: normal; color: #c0cee0; font-size: 15px; margin-top: 8px; }
+.status { white-space: normal; font-size: 17px; margin-top: 24px; margin-bottom: 12px; }
+.actions { flex-direction: row; flex-wrap: wrap; margin-top: 14px; }
+Button {
+    flex-grow: 1;
+    min-height: 38px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    padding: 8px 14px;
+    background-color: #83d8cd;
+    color: #101a28;
+    border-width: 0;
+    border-radius: 5px;
+    -unity-font-style: bold;
+}
+Button:hover { background-color: #acebe2; }
+Button:active { background-color: #5ebcaf; }
+Button:disabled { background-color: #34475c; color: #a5b1c1; }
+.secondary { background-color: #c7d8ef; }
+.hint { margin-top: 16px; }
+.unity-progress-bar__container { height: 24px; }
+.unity-progress-bar__background { background-color: #101a28; }
+.unity-progress-bar__progress { background-color: #4e9e98; }
+.unity-progress-bar__title { color: #ffffff; -unity-font-style: bold; }

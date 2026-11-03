@@ -25,7 +25,17 @@ namespace SWeetJelly.Loading.Contract
             Message = message ?? string.Empty;
             MinimumDuration = minimumDuration;
             WaitForManualCompletion = waitForManualCompletion;
-            Tasks = tasks ?? Array.Empty<ILoadingTask>();
+            if (tasks == null || tasks.Count == 0)
+            {
+                Tasks = Array.Empty<ILoadingTask>();
+            }
+            else
+            {
+                var copy = new ILoadingTask[tasks.Count];
+                for (var i = 0; i < copy.Length; i++)
+                    copy[i] = tasks[i];
+                Tasks = Array.AsReadOnly(copy);
+            }
         }
     }
 
